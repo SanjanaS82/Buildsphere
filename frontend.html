@@ -841,34 +841,48 @@ async function saveEntry(sectionId) {
     if (val) hasValue = true;
   });
 
-  // ✅ VALIDATION (add this)
-if (!entryData[sec.fields[0]]) {
-  showToast("Please fill the first required field", "error");
-  return;
-}
+  // ✅ Validation
+  if (!entryData[sec.fields[0]]) {
+    showToast("Please fill the first required field", "error");
+    return;
+  }
 
   if (!hasValue) {
     showToast("Fill at least one field", "error");
     return;
   }
 
-  const { error } = await supabaseClient
-    .from('entries')
-    .insert([
-      {
-        section: sectionId,
-        week_id: currentWeek,
-        data: entryData,
-        created_by: currentUser.name
-      }
-    ]);
+  let response;
 
-  if (error) {
-    console.log(error);
+  if (editingEntryId) {
+    // 🔥 UPDATE
+    response = await supabaseClient
+      .from('entries')
+      .update({ data: entryData })
+      .eq('id', editingEntryId);
+  } else {
+    // 🔥 INSERT
+    response = await supabaseClient
+      .from('entries')
+      .insert([
+        {
+          section: sectionId,
+          week_id: currentWeek,
+          data: entryData,
+          created_by: currentUser.name
+        }
+      ]);
+  }
+
+  if (response.error) {
+    console.log(response.error);
     showToast("Error saving", "error");
   } else {
-    showToast("Saved to DB 🚀", "success");
-    loadEntries(sectionId); // reload UI
+    showToast(editingEntryId ? "Updated ✏️" : "Saved 🚀", "success");
+
+    editingEntryId = null; // reset
+    clearForm();           // optional UX boost
+    loadEntries(sectionId);
   }
 }
 
@@ -913,17 +927,21 @@ async function deleteEntry(sectionId, entryId) {
 }
 
 function editEntry(sectionId, entryId) {
-  const sec   = ALL_SECTIONS.find(s => s.id === sectionId);
-  const entry = (sectionData[sectionId]||[]).find(e => e.id === entryId);
+  const sec = ALL_SECTIONS.find(s => s.id === sectionId);
+  const entry = (sectionData[sectionId] || []).find(e => e.id === entryId);
+
   if (!entry || !sec) return;
+
+  // Fill form
   sec.fields.forEach(f => {
-    const el = document.getElementById('field_'+f);
+    const el = document.getElementById('field_' + f);
     if (el) el.value = entry[f] || '';
   });
-  // Remove old, save will re-add
-  sectionData[sectionId] = sectionData[sectionId].filter(e => e.id !== entryId);
-  renderEntryView();
-  showToast('Loaded into form — edit and save');
+
+  // 🔥 Store editing ID
+  editingEntryId = entryId;
+
+  showToast("Editing mode — update and save");
 }
 
 function clearForm() {
@@ -1007,16 +1025,23 @@ function buildReportPreview() {
 }
 
 function exportReport(format) {
-  const prog = document.getElementById('exportProgress');
-  prog.querySelector('div').className='spinner';
-  prog.style.color='var(--green)';
-  prog.querySelector('span') ? prog.querySelector('span').textContent = `Generating ${format.toUpperCase()}…` : null;
-  prog.innerHTML = `<div class="spinner"></div>Generating ${format.toUpperCase()}…`;
-  prog.classList.add('show');
-  setTimeout(()=>{
-    prog.classList.remove('show');
-    showToast(`${format.toUpperCase()} generated! (Firebase Storage in production)`, 'success');
-  }, 2200);
+  if (format === 'pdf') {
+    const element = document.getElementById('reportPreviewContent');
+
+    const opt = {
+      margin: 0.5,
+      filename: 'Weekly_Report.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+
+    showToast("PDF downloaded 📄", "success");
+  } else {
+    showToast("DOCX coming soon (PDF works perfectly)", "success");
+  }
 }
 
 // ══════════════════════════════════════════════
