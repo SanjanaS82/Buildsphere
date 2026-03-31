@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BVRIT Weekly Report System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg: #0e0f13;
+  --bg2: #16181f;
+  --bg3: #1e2029;
+  --bg4: #252830;
+  --border: #2e3140;
+  --border2: #3a3e52;
+  --text: #e8eaf0;
+  --text2: #9095a8;
+  --text3: #5a5f72;
+  --accent: #6c63ff;
+  --accent2: #8b84ff;
+  --accent-bg: rgba(108,99,255,0.12);
+  --accent-border: rgba(108,99,255,0.3);
+  --green: #2dd4a0;
+  --green-bg: rgba(45,212,160,0.1);
+  --amber: #f5a623;
+  --amber-bg: rgba(245,166,35,0.1);
+  --red: #ff5c5c;
+  --red-bg: rgba(255,92,92,0.1);
+  --blue: #4dabf7;
+  --blue-bg: rgba(77,171,247,0.1);
+  --r: 10px;
+  --r2: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.serif{font-family:'DM Serif Display',serif}
+.mono{font-family:'DM Mono',monospace}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+
+/* ─────────────── LOGIN ─────────────── */
+#loginScreen{align-items:center;justify-content:center;background:var(--bg)}
+.login-card{width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:44px;box-shadow:var(--shadow)}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .wordmark{font-size:13px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+.login-logo .title{font-size:22px;color:var(--text)}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent2);font-size:11px;padding:4px 10px;border-radius:20px;letter-spacing:.5px;margin-bottom:8px}
+.dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.form-group{margin-bottom:18px}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;letter-spacing:.3px}
+input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;color:var(--text);font-family:inherit;font-size:14px;transition:border-color .2s,box-shadow .2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15)}
+select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:80px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:var(--r);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .18s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,99,255,.4)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,92,92,.2)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid rgba(45,212,160,.2)}
+.btn-full{width:100%}
+
+.divider{text-align:center;color:var(--text3);font-size:12px;margin:20px 0;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border)}
+.divider::before{left:0}
+.divider::after{right:0}
+
+.demo-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.role-chip{padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;text-align:center;cursor:pointer;transition:all .15s}
+.role-chip:hover{border-color:var(--accent);background:var(--accent-bg)}
+.role-chip .role-name{font-size:12px;font-weight:500;color:var(--text)}
+.role-chip .role-dept{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* ─────────────── SHELL ─────────────── */
+#appScreen{flex-direction:row}
+.sidebar{width:240px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo{font-size:15px;font-weight:600;color:var(--text)}
+.sidebar-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.sidebar-user{margin:12px 16px;padding:10px 12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)}
+.user-name{font-size:13px;font-weight:500}
+.user-role{font-size:11px;margin-top:2px}
+.role-faculty{color:var(--blue)}
+.role-coordinator{color:var(--amber)}
+.role-admin{color:var(--accent2)}
+
+.nav{flex:1;padding:8px}
+.nav-section{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:10px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;margin-bottom:2px;text-decoration:none;border:none;background:transparent;width:100%;font-family:inherit}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
+.nav-item .icon{width:16px;height:16px;opacity:.7;flex-shrink:0}
+.nav-item .badge-count{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px}
+.nav-item .status-dot{margin-left:auto;width:7px;height:7px;border-radius:50%}
+.status-pending{background:var(--red)}
+.status-progress{background:var(--amber)}
+.status-complete{background:var(--green)}
+
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
+.week-badge{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.week-label{font-size:10px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.week-dates{font-size:12px;color:var(--text);margin-top:3px;font-weight:500}
+.week-status{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:6px}
+.week-open{background:var(--green-bg);color:var(--green)}
+.week-closed{background:var(--red-bg);color:var(--red)}
+
+/* ─────────────── MAIN ─────────────── */
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.presence-pills{display:flex;gap:-4px}
+.presence-pill{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid var(--bg);margin-left:-6px}
+
+.page-content{padding:28px}
+.page-header{margin-bottom:24px}
+.page-title{font-size:22px;font-weight:600}
+.page-sub{font-size:14px;color:var(--text2);margin-top:4px}
+
+/* ─────────────── DASHBOARD ─────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:20px}
+.stat-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:28px;font-weight:600;margin-top:6px}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:4px}
+.stat-green{color:var(--green)}
+.stat-amber{color:var(--amber)}
+.stat-red{color:var(--red)}
+.stat-accent{color:var(--accent2)}
+
+.sections-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px 20px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:space-between}
+.section-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px)}
+.section-card.active-section{border-color:var(--accent);background:var(--accent-bg)}
+.section-info{}
+.section-num{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.5px}
+.section-name{font-size:14px;font-weight:500;margin-top:2px}
+.section-count{font-size:12px;color:var(--text3);margin-top:3px}
+.section-status{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.status-pill{font-size:10px;padding:3px 10px;border-radius:10px;font-weight:500}
+.sp-pending{background:var(--red-bg);color:var(--red)}
+.sp-progress{background:var(--amber-bg);color:var(--amber)}
+.sp-complete{background:var(--green-bg);color:var(--green)}
+
+/* ─────────────── ENTRY FORM ─────────────── */
+.entry-view{max-width:860px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text2);font-size:13px;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;margin-bottom:12px}
+.back-btn:hover{color:var(--text)}
+
+.entries-table{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:20px}
+.table-header{display:grid;padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.table-row{display:grid;padding:14px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .12s}
+.table-row:last-child{border-bottom:none}
+.table-row:hover{background:var(--bg3)}
+.table-cell{font-size:13px}
+.entry-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+
+.add-form{background:var(--bg2);border:1px solid var(--accent-border);border-radius:var(--r2);padding:22px;margin-bottom:20px}
+.form-title{font-size:14px;font-weight:600;margin-bottom:16px;color:var(--accent2)}
+.form-grid{display:grid;gap:14px}
+.form-grid-2{grid-template-columns:1fr 1fr}
+.form-grid-3{grid-template-columns:1fr 1fr 1fr}
+.form-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:12px;opacity:.4}
+.empty-text{font-size:14px}
+
+/* ─────────────── REPORT PREVIEW ─────────────── */
+.preview-container{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.preview-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.preview-doc{background:#fff;color:#111;padding:40px 48px;min-height:600px;font-family:'Times New Roman',serif;font-size:13px;line-height:1.6}
+.preview-doc h1{font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
+.preview-doc .inst-sub{font-size:11px;text-align:center;color:#333;margin-bottom:2px}
+.preview-doc .report-title{font-size:14px;font-weight:700;text-align:center;margin:10px 0 16px}
+.preview-doc .week-line{font-size:12px;margin-bottom:4px}
+.preview-doc .week-line span{color:#c0392b;font-weight:600}
+.preview-doc .section-heading{font-size:12px;font-weight:700;margin:16px 0 8px}
+.preview-doc table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+.preview-doc th{background:#f0f0f0;border:1px solid #999;padding:5px 8px;font-weight:700;text-align:left}
+.preview-doc td{border:1px solid #999;padding:5px 8px;vertical-align:top}
+.preview-doc .achievements-title{color:#c0392b;font-weight:700;font-size:13px;text-align:center;margin:12px 0 4px}
+.export-progress{display:none;align-items:center;gap:10px;color:var(--green);font-size:13px}
+.export-progress.show{display:flex}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─────────────── ADMIN ─────────────── */
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:22px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.user-row:last-child{border-bottom:none}
+.user-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.user-info{margin-left:10px;flex:1}
+.user-info .un{font-size:13px;font-weight:500}
+.user-info .ud{font-size:11px;color:var(--text3);margin-top:1px}
+.role-badge{font-size:10px;padding:3px 8px;border-radius:6px}
+.rb-faculty{background:var(--blue-bg);color:var(--blue)}
+.rb-coordinator{background:var(--amber-bg);color:var(--amber)}
+.rb-admin{background:var(--accent-bg);color:var(--accent2)}
+
+.week-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.week-row:last-child{border-bottom:none}
+.week-dates-text{font-size:13px;font-weight:500}
+.week-range{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle-btn{width:42px;height:22px;border-radius:11px;border:none;cursor:pointer;transition:background .2s;position:relative}
+.toggle-btn.on{background:var(--green)}
+.toggle-btn.off{background:var(--border2)}
+.toggle-knob{position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle-btn.on .toggle-knob{left:22px}
+.toggle-btn.off .toggle-knob{left:2px}
+
+/* ─────────────── TOAST ─────────────── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 18px;font-size:13px;color:var(--text);box-shadow:var(--shadow);transform:translateY(80px);opacity:0;transition:all .3s;z-index:1000;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{border-color:rgba(45,212,160,.4);background:rgba(45,212,160,.08);color:var(--green)}
+#toast.error{border-color:rgba(255,92,92,.4);background:rgba(255,92,92,.08);color:var(--red)}
+
+/* ─────────────── MODAL ─────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:28px;width:480px;box-shadow:var(--shadow)}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+
+/* ─────────────── TABS ─────────────── */
+.tab-bar{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:20px;width:fit-content}
+.tab{padding:7px 16px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .15s;border:none;background:transparent;font-family:inherit}
+.tab.active{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
+.tab:hover:not(.active){color:var(--text);background:var(--bg3)}
+
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:500}
+.chip-blue{background:var(--blue-bg);color:var(--blue)}
+.chip-green{background:var(--green-bg);color:var(--green)}
+.chip-amber{background:var(--amber-bg);color:var(--amber)}
+
+/* audit log */
+.audit-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.audit-row:last-child{border-bottom:none}
+.audit-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.audit-content{flex:1}
+.audit-action{font-size:13px}
+.audit-meta{font-size:11px;color:var(--text3);margin-top:2px}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="loginScreen" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="badge"><span class="dot"></span>LIVE SYSTEM</div>
+      <div class="title serif" style="margin-top:10px">Weekly Report Portal</div>
+      <div class="wordmark">BVRIT Hyderabad</div>
+    </div>
+
+    <div class="form-group">
+      <label>Email address</label>
+      <input type="email" id="loginEmail" placeholder="you@bvrit.ac.in" value="faculty@bvrit.ac.in"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" value="password123"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
+
+    <div class="divider" style="margin-top:24px">Quick demo login</div>
+    <div class="demo-roles">
+      <div class="role-chip" onclick="quickLogin('faculty')">
+        <div class="role-name">Faculty</div>
+        <div class="role-dept">CSE(AI&ML)</div>
+      </div>
+      <div class="role-chip" onclick="quickLogin('coordinator')">
+        <div class="role-name">Coordinator</div>
+        <div class="role-dept">All depts</div>
+      </div>
+      <div class="role-chip" onclick="quickLogin('admin')">
+        <div class="role-name">Admin</div>
+        <div class="role-dept">Full access</div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:16px">Demo mode — Firebase config needed for production</p>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="appScreen" class="screen">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">BVRIT Reports</div>
+      <div class="sidebar-sub">Weekly Management System</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-name" id="sidebarName">Dr. Ananya Reddy</div>
+      <div class="user-role role-faculty" id="sidebarRole">Faculty · CSE(AI&ML)</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <button class="nav-item active" onclick="showPage('dashboard')">
+        <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </button>
+      <div class="nav-section" style="margin-top:8px">Report Sections</div>
+      <button class="nav-item" onclick="showPage('sections')" id="navSections">
+        <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12M2 8h8M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        All Sections
+        <span class="badge-count" id="pendingCount">5</span>
+      </button>
+      <div class="nav-section" style="margin-top:8px">Reports</div>
+      <button class="nav-item" onclick="showPage('preview')">
+        <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h8l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M11 2v3h3" fill="none" stroke="#fff" stroke-width="1"/></svg>
+        Report Preview
+      </button>
+      <div id="adminNav" style="display:none">
+        <div class="nav-section" style="margin-top:8px">Admin</div>
+        <button class="nav-item" onclick="showPage('admin')">
+          <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5"/></svg>
+          User Management
+        </button>
+        <button class="nav-item" onclick="showPage('weeks')">
+          <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Week Management
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="week-badge">
+        <div class="week-label">Current Week</div>
+        <div class="week-dates">23 – 28 Mar 2026</div>
+        <span class="week-status week-open">Open</span>
+      </div>
+      <button class="btn btn-ghost btn-full btn-sm" style="margin-top:10px" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <div style="font-size:12px;color:var(--text3)">23–28 Mar 2026</div>
+        <div style="display:flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid rgba(45,212,160,.2);border-radius:20px;padding:5px 10px">
+          <span class="dot"></span>
+          <span style="font-size:12px;color:var(--green)">3 online</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <div id="dashPage" class="page-content">
+      <div class="page-header">
+        <div class="page-title serif">Good morning, <span id="greetName">Dr. Reddy</span></div>
+        <div class="page-sub">Week 13 · 23rd March to 28th March 2026 · CSE(AI&ML)</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Sections Complete</div>
+          <div class="stat-value stat-green" id="statComplete">12</div>
+          <div class="stat-sub">of 17 sections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Entries</div>
+          <div class="stat-value stat-accent" id="statEntries">31</div>
+          <div class="stat-sub">across all sections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Sections</div>
+          <div class="stat-value stat-amber" id="statPending">5</div>
+          <div class="stat-sub">need entries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Contributors</div>
+          <div class="stat-value stat-accent">7</div>
+          <div class="stat-sub">faculty this week</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:15px;font-weight:600">Section Status</div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('sections')">View all →</button>
+      </div>
+      <div class="sections-grid" id="dashSectionsGrid"></div>
+    </div>
+
+    <!-- ── SECTIONS LIST PAGE ── -->
+    <div id="sectionsPage" class="page-content" style="display:none">
+      <div class="page-header">
+        <div class="page-title">All Sections</div>
+        <div class="page-sub">Click a section to add or manage entries</div>
+      </div>
+      <div class="sections-grid" id="allSectionsGrid" style="grid-template-columns:repeat(3,1fr)"></div>
+    </div>
+
+    <!-- ── ENTRY PAGE ── -->
+    <div id="entryPage" class="page-content" style="display:none">
+      <button class="back-btn" onclick="goBackToSections()">← Back to sections</button>
+      <div class="entry-view" id="entryViewContainer"></div>
+    </div>
+
+    <!-- ── PREVIEW PAGE ── -->
+    <div id="previewPage" class="page-content" style="display:none">
+      <div class="page-header">
+        <div class="page-title">Report Preview</div>
+        <div class="page-sub">Live preview in BVRIT institutional format</div>
+      </div>
+      <div class="preview-container">
+        <div class="preview-toolbar">
+          <div style="font-size:13px;font-weight:500">Week 13 · CSE(AI&ML) · 23–28 Mar 2026</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="export-progress" id="exportProgress"><div class="spinner"></div>Generating DOCX…</div>
+            <button class="btn btn-ghost btn-sm" onclick="exportReport('docx')">Export DOCX</button>
+            <button class="btn btn-primary btn-sm" onclick="exportReport('pdf')">Export PDF</button>
+          </div>
+        </div>
+        <div class="preview-doc" id="reportPreviewContent"></div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN PAGE ── -->
+    <div id="adminPage" class="page-content" style="display:none">
+      <div class="page-header">
+        <div class="page-title">User Management</div>
+        <div class="page-sub">Manage roles and department access</div>
+      </div>
+      <div class="admin-grid">
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5"/></svg>
+            Registered Users
+          </div>
+          <div id="usersList"></div>
+          <button class="btn btn-ghost btn-full btn-sm" style="margin-top:14px" onclick="openAddUserModal()">+ Add user</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Audit Log</div>
+          <div id="auditLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WEEKS PAGE ── -->
+    <div id="weeksPage" class="page-content" style="display:none">
+      <div class="page-header">
+        <div class="page-title">Week Management</div>
+        <div class="page-sub">Open and close reporting periods</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-title">Create New Week</div>
+          <div class="form-group">
+            <label>Start date</label>
+            <input type="date" id="weekStart" value="2026-03-30"/>
+          </div>
+          <div class="form-group">
+            <label>End date</label>
+            <input type="date" id="weekEnd" value="2026-04-04"/>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="createWeek()">Create week period</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Reporting Periods</div>
+          <div id="weeksList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /appScreen -->
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-title">Add new user</div>
+    <div class="form-group"><label>Full name</label><input id="newUserName" placeholder="Dr. Name"/></div>
+    <div class="form-group"><label>Email</label><input id="newUserEmail" type="email" placeholder="name@bvrit.ac.in"/></div>
+    <div class="form-group"><label>Role</label>
+      <select id="newUserRole">
+        <option value="faculty">Faculty</option>
+        <option value="coordinator">Coordinator</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Department</label>
+      <select id="newUserDept">
+        <option value="CSE(AI&ML)">CSE (AI&ML)</option>
+        <option value="CSE">CSE</option>
+        <option value="ECE">ECE</option>
+        <option value="EEE">EEE</option>
+        <option value="IT">IT</option>
+        <option value="BSH">BSH</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addUser()">Add user</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// FIREBASE CONFIG — Replace with your project config
+// ══════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// ══════════════════════════════════════════════
+// DEMO DATA (used when Firebase not configured)
+// ══════════════════════════════════════════════
+const DEMO_USERS = {
+  faculty:      { uid:'u1', name:'Dr. Ananya Reddy',    email:'faculty@bvrit.ac.in',     role:'faculty',      dept:'CSE(AI&ML)' },
+  coordinator:  { uid:'u2', name:'Prof. Sridhar Rao',   email:'coord@bvrit.ac.in',       role:'coordinator',  dept:'CSE(AI&ML)' },
+  admin:        { uid:'u3', name:'Dr. Meena Krishnan',  email:'admin@bvrit.ac.in',       role:'admin',        dept:'All' }
+};
+
+const ALL_SECTIONS = [
+  { id:'generalPoints',         num:'01', name:'General Points',                  fields:['details'], cols:['Details'], gridCols:'1fr' },
+  { id:'facultyJoined',         num:'02', name:'Faculty Joined / Relieved',       fields:['name','department','designation','joiningDate','relievingDate'], cols:['Name','Dept','Designation','Joining','Relieving'], gridCols:'repeat(5,1fr)' },
+  { id:'facultyAchievements',   num:'03', name:'Faculty Achievements',            fields:['name','department','achievement','date'], cols:['Name','Dept','Achievement','Date'], gridCols:'repeat(4,1fr)' },
+  { id:'studentAchievements',   num:'04', name:'Student Achievements',            fields:['name','rollNo','department','achievement','date'], cols:['Name','Roll No','Dept','Achievement','Date'], gridCols:'repeat(5,1fr)' },
+  { id:'deptAchievements',      num:'05', name:'Department Achievements',         fields:['achievement','date'], cols:['Achievement','Date'], gridCols:'1fr 160px' },
+  { id:'facultyEvents',         num:'06', name:'Faculty Events Conducted',        fields:['eventName','department','resourcePerson','coordinator','count','dates'], cols:['Event','Dept','Resource Person','Coordinator','Count','Dates'], gridCols:'repeat(6,1fr)' },
+  { id:'studentEvents',         num:'07', name:'Student Events Conducted',        fields:['eventName','department','resourcePerson','coordinator','count','dates'], cols:['Event','Dept','Resource Person','Coordinator','Count','Dates'], gridCols:'repeat(6,1fr)' },
+  { id:'nonTechnicalEvents',    num:'08', name:'Non-Technical Events',            fields:['eventName','department','resourcePerson','coordinator','count','dates'], cols:['Event','Dept','Resource Person','Coordinator','Count','Dates'], gridCols:'repeat(6,1fr)' },
+  { id:'industryVisits',        num:'09', name:'Industry / College Visits',       fields:['industry','department','coordinator','count','dates'], cols:['Industry & Location','Dept','Coordinator','Count','Dates'], gridCols:'repeat(5,1fr)' },
+  { id:'hackathons',            num:'10', name:'Hackathons / External Events',    fields:['eventName','organizer','mentor','count','dates'], cols:['Event','Organizer','Mentor','Count','Dates'], gridCols:'repeat(5,1fr)' },
+  { id:'facultyFDP',            num:'11', name:'Faculty FDP / Certifications',    fields:['name','department','program','organizer','dates'], cols:['Faculty','Dept','Program','Organizer','Dates'], gridCols:'repeat(5,1fr)' },
+  { id:'facultyVisits',         num:'12', name:'Faculty Visits',                  fields:['name','department','location','dates'], cols:['Faculty','Dept','Location','Dates'], gridCols:'repeat(4,1fr)' },
+  { id:'patents',               num:'13', name:'Patents Published',               fields:['name','title','applicationNo','publicationDate'], cols:['Faculty','Patent Title','App. No','Pub. Date'], gridCols:'repeat(4,1fr)' },
+  { id:'vedicPrograms',         num:'14', name:'VEDIC Programs',                  fields:['program','department','count','dates','centre'], cols:['Program','Dept','Count','Dates','Centre'], gridCols:'repeat(5,1fr)' },
+  { id:'placements',            num:'15', name:'Placements',                      fields:['company','department','count','package'], cols:['Company','Dept','Count','Package'], gridCols:'repeat(4,1fr)' },
+  { id:'mous',                  num:'16', name:'MoUs Signed',                     fields:['organization','signingDate','validity','purpose'], cols:['Organization','Date','Validity','Purpose'], gridCols:'repeat(4,1fr)' },
+  { id:'skillDevelopment',      num:'17', name:'Skill Development Programs',      fields:['program','coordinator','topic','count','sessions'], cols:['Program','Coordinator','Topic','Count','Sessions'], gridCols:'repeat(5,1fr)' },
+];
+
+const FIELD_LABELS = {
+  name:'Name', department:'Department', designation:'Designation', joiningDate:'Joining Date',
+  relievingDate:'Relieving Date', achievement:'Achievement', date:'Date', details:'Details',
+  rollNo:'Roll No.', eventName:'Event Name', resourcePerson:'Resource Person',
+  coordinator:'Coordinator', count:'Count', dates:'Dates', industry:'Industry & Location',
+  organizer:'Organizer', mentor:'Mentor', program:'Program', organizer2:'Organizer',
+  location:'Location Visited', title:'Patent Title', applicationNo:'App. No.',
+  publicationDate:'Pub. Date', centre:'Centre (Hyd/B\'lore)', company:'Company',
+  package:'Package', organization:'Organization', signingDate:'Signing Date',
+  validity:'Validity', purpose:'Purpose', topic:'Topic / Faculty', sessions:'Sessions'
+};
+
+// Pre-seeded demo entries
+const DEMO_ENTRIES = {
+  studentAchievements: [
+    { id:'e1', name:'Ms.P.Madhuri',   rollNo:'22WH1A6622', department:'CSE(AI&ML)', achievement:'Secured AIR-27587 in GATE CS', date:'19-03-2026', createdBy:'Dr. Ananya Reddy', updatedAt:'2 hrs ago' },
+    { id:'e2', name:'Ms.G.Vaishnavi', rollNo:'22WH1A6658', department:'CSE(AI&ML)', achievement:'Secured AIR-33516 in GATE CS', date:'19-03-2026', createdBy:'Dr. Ananya Reddy', updatedAt:'2 hrs ago' },
+    { id:'e3', name:'Ms.M.Srijani',   rollNo:'23WH1A6610', department:'CSE(AI&ML)', achievement:'Secured AIR-27580 in GATE CS', date:'19-03-2026', createdBy:'Prof. Lalitha',     updatedAt:'3 hrs ago' },
+  ],
+  hackathons: [
+    { id:'e4', eventName:'OU International Women\'s Conference', organizer:'Osmania University', mentor:'-', count:'1 (24wh1a6633)', dates:'24-03-2026 to 26-03-2026', createdBy:'Prof. Sridhar', updatedAt:'1 hr ago' },
+    { id:'e5', eventName:'Hawkins Lab Workshop', organizer:'GDGOC GRIET', mentor:'Ms.Sayan Mondal', count:'1 (24wh1a6621)', dates:'25-03-2026 to 26-03-2026', createdBy:'Prof. Sridhar', updatedAt:'1 hr ago' },
+  ],
+  placements: [
+    { id:'e6', company:'Deloitte',  department:'CSE(AI&ML)', count:'1',  package:'4 LPA',   createdBy:'Prof. Shanmukha', updatedAt:'4 hrs ago' },
+    { id:'e7', company:'HCL Tech',  department:'CSE(AI&ML)', count:'11', package:'4.5 LPA', createdBy:'Prof. Shanmukha', updatedAt:'4 hrs ago' },
+  ],
+  skillDevelopment: [
+    { id:'e8',  program:'MLOP\'s',      coordinator:'Ms.K.Lalitha Kumari',   topic:'Assessment',                                count:'14 (2nd yr)', sessions:'8', createdBy:'Ms.Lalitha',   updatedAt:'5 hrs ago' },
+    { id:'e9',  program:'BFSI',         coordinator:'Ms.B.Shanmukha Priya',  topic:'Behavioral learning, Fintech terminologies', count:'23 (2nd yr)', sessions:'8', createdBy:'Ms.Shanmukha', updatedAt:'5 hrs ago' },
+    { id:'e10', program:'AI for Kiran', coordinator:'Ms.Shruthi',            topic:'Introduction to Prompt Engineering',          count:'18',          sessions:'3', createdBy:'Ms.Shruthi',   updatedAt:'5 hrs ago' },
+    { id:'e11', program:'Juniper',      coordinator:'Ms.E.G.Padmavathi',     topic:'Connecting to a secure shell',                count:'5 (2nd yr)',  sessions:'3', createdBy:'Ms.Padmavathi', updatedAt:'5 hrs ago' },
+  ],
+  facultyJoined: [
+    { id:'e12', name:'Dr.M.Pallavi', department:'CSE(AI&ML)', designation:'Assistant Professor', joiningDate:'23-03-2026', relievingDate:'-', createdBy:'Admin', updatedAt:'6 hrs ago' },
+  ],
+};
+
+// ══════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════
+let currentUser = null;
+let currentSection = null;
+let sectionData = JSON.parse(JSON.stringify(DEMO_ENTRIES));
+let demoUsers = [
+  { uid:'u1', name:'Dr. Ananya Reddy',    email:'faculty@bvrit.ac.in',   role:'faculty',     dept:'CSE(AI&ML)', color:'#6c63ff' },
+  { uid:'u2', name:'Prof. Sridhar Rao',   email:'coord@bvrit.ac.in',     role:'coordinator', dept:'CSE(AI&ML)', color:'#f5a623' },
+  { uid:'u3', name:'Dr. Meena Krishnan',  email:'admin@bvrit.ac.in',     role:'admin',       dept:'All',        color:'#2dd4a0' },
+  { uid:'u4', name:'Prof. K. Lalitha',    email:'lalitha@bvrit.ac.in',   role:'faculty',     dept:'CSE(AI&ML)', color:'#4dabf7' },
+  { uid:'u5', name:'Prof. Shanmukha',     email:'shanmukha@bvrit.ac.in', role:'faculty',     dept:'CSE(AI&ML)', color:'#ff5c5c' },
+];
+let auditLog = [
+  { action:'Added 3 student achievements', user:'Dr. Ananya Reddy', time:'2 hours ago', type:'add' },
+  { action:'Updated placement entry (HCL)', user:'Prof. Shanmukha',  time:'4 hours ago', type:'edit' },
+  { action:'Added 4 skill dev entries',    user:'Ms. Lalitha',       time:'5 hours ago', type:'add' },
+  { action:'Faculty joined — Dr.M.Pallavi', user:'Admin',            time:'6 hours ago', type:'add' },
+];
+let demoWeeks = [
+  { id:'w1', start:'23 Mar 2026', end:'28 Mar 2026', status:'open' },
+  { id:'w2', start:'16 Mar 2026', end:'21 Mar 2026', status:'closed' },
+  { id:'w3', start:'09 Mar 2026', end:'14 Mar 2026', status:'closed' },
+];
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pass  = document.getElementById('loginPassword').value;
+  if (!email || !pass) { showToast('Enter email and password','error'); return; }
+  // Demo: match by email
+  const found = Object.values(DEMO_USERS).find(u => u.email === email);
+  if (found) { loginAs(found); }
+  else { quickLogin('faculty'); }
+}
+
+function quickLogin(role) {
+  loginAs(DEMO_USERS[role]);
+}
+
+function loginAs(user) {
+  currentUser = user;
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarRole').textContent = `${user.role.charAt(0).toUpperCase()+user.role.slice(1)} · ${user.dept}`;
+  document.getElementById('sidebarRole').className = `user-role role-${user.role}`;
+  document.getElementById('greetName').textContent = user.name.split(' ')[1] || user.name;
+  document.getElementById('adminNav').style.display = user.role === 'admin' ? 'block' : 'none';
+  buildDashSections();
+  buildAllSections();
+  buildUsersList();
+  buildAuditLog();
+  buildWeeksList();
+  buildReportPreview();
+  showToast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  showToast('Signed out');
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+const PAGES = ['dash','sections','entry','preview','admin','weeks'];
+function showPage(name) {
+  PAGES.forEach(p => {
+    const el = document.getElementById(p+'Page');
+    if(el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+  const target = document.getElementById(name+'Page');
+  if (target) target.style.display = 'block';
+
+  const titles = { dash:'Dashboard', sections:'Report Sections', entry:'Section Entry', preview:'Report Preview', admin:'User Management', weeks:'Week Management' };
+  document.getElementById('topbarTitle').textContent = titles[name] || name;
+
+  // highlight nav
+  const navMap = { dash:'dashboard', sections:'sections', preview:'preview', admin:'admin', weeks:'weeks' };
+  document.querySelectorAll('.nav-item').forEach(b => {
+    if(b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${navMap[name] || name}'`)) b.classList.add('active');
+  });
+}
+
+function goBackToSections() {
+  currentSection = null;
+  showPage('sections');
+}
+
+// ══════════════════════════════════════════════
+// SECTION STATUS HELPER
+// ══════════════════════════════════════════════
+function getSectionStatus(sectionId) {
+  const entries = sectionData[sectionId];
+  if (!entries || entries.length === 0) return 'pending';
+  return entries.length >= 2 ? 'complete' : 'progress';
+}
+
+function buildSectionCard(sec, onclick) {
+  const status = getSectionStatus(sec.id);
+  const count   = (sectionData[sec.id] || []).length;
+  const labels  = { pending:'Pending', progress:'In progress', complete:'Complete' };
+  const cls     = { pending:'sp-pending', progress:'sp-progress', complete:'sp-complete' };
+  return `<div class="section-card" onclick="${onclick}">
+    <div class="section-info">
+      <div class="section-num">SECTION ${sec.num}</div>
+      <div class="section-name">${sec.name}</div>
+      <div class="section-count">${count} ${count===1?'entry':'entries'}</div>
+    </div>
+    <div class="section-status">
+      <span class="status-pill ${cls[status]}">${labels[status]}</span>
+      <div class="status-dot ${status==='pending'?'status-pending':status==='progress'?'status-progress':'status-complete'}"></div>
+    </div>
+  </div>`;
+}
+
+function buildDashSections() {
+  const grid = document.getElementById('dashSectionsGrid');
+  const preview = ALL_SECTIONS.slice(0,8);
+  grid.innerHTML = preview.map(s => buildSectionCard(s, `openSection('${s.id}')`)).join('');
+  // Update stats
+  const completed = ALL_SECTIONS.filter(s => getSectionStatus(s.id)==='complete').length;
+  const pending   = ALL_SECTIONS.filter(s => getSectionStatus(s.id)==='pending').length;
+  const total     = Object.values(sectionData).reduce((a,b)=>a+b.length, 0);
+  document.getElementById('statComplete').textContent = completed;
+  document.getElementById('statPending').textContent  = pending;
+  document.getElementById('statEntries').textContent  = total;
+  document.getElementById('pendingCount').textContent = pending;
+}
+
+function buildAllSections() {
+  document.getElementById('allSectionsGrid').innerHTML =
+    ALL_SECTIONS.map(s => buildSectionCard(s, `openSection('${s.id}')`)).join('');
+}
+
+// ══════════════════════════════════════════════
+// OPEN A SECTION FOR ENTRY
+// ══════════════════════════════════════════════
+function openSection(sectionId) {
+  currentSection = ALL_SECTIONS.find(s => s.id === sectionId);
+  if (!currentSection) return;
+  showPage('entry');
+  renderEntryView();
+}
+
+function renderEntryView() {
+  const sec     = currentSection;
+  const entries = sectionData[sec.id] || [];
+  const canEdit = true; // In real app: check role + week status
+
+  const tableHeader = `<div class="table-header" style="grid-template-columns:30px ${sec.gridCols} 100px">
+    <div>#</div>
+    ${sec.cols.map(c=>`<div>${c}</div>`).join('')}
+    <div style="text-align:right">Actions</div>
+  </div>`;
+
+  const tableRows = entries.length === 0
+    ? `<div class="empty-state"><div class="empty-icon">○</div><div class="empty-text">No entries yet. Add the first entry below.</div></div>`
+    : entries.map((e,i) => `
+    <div class="table-row" style="grid-template-columns:30px ${sec.gridCols} 100px">
+      <div class="table-cell" style="color:var(--text3);font-size:11px;font-family:'DM Mono',monospace">${i+1}</div>
+      ${sec.fields.map(f => `<div class="table-cell">${e[f]||'—'}<div class="entry-meta">${i===0?e.createdBy||'':''}${i===0&&e.updatedAt?' · '+e.updatedAt:''}</div></div>`).join('')}
+      <div class="table-cell row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editEntry('${sec.id}','${e.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEntry('${sec.id}','${e.id}')">Del</button>
+      </div>
+    </div>`).join('');
+
+  const addFormFields = sec.fields.map(f => `
+    <div class="form-group">
+      <label>${FIELD_LABELS[f]||f}</label>
+      <input id="field_${f}" placeholder="${FIELD_LABELS[f]||f}"/>
+    </div>`).join('');
+
+  document.getElementById('entryViewContainer').innerHTML = `
+    <div class="section-header">
+      <div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px">SECTION ${sec.num}</div>
+        <div style="font-size:20px;font-weight:600">${sec.name}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">${entries.length} ${entries.length===1?'entry':'entries'} · Week 23–28 Mar 2026</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="chip chip-blue">CSE(AI&ML)</span>
+        <span class="chip ${getSectionStatus(sec.id)==='complete'?'chip-green':getSectionStatus(sec.id)==='progress'?'chip-amber':'chip-blue'}">${getSectionStatus(sec.id).charAt(0).toUpperCase()+getSectionStatus(sec.id).slice(1)}</span>
+      </div>
+    </div>
+
+    <div class="entries-table">
+      ${tableHeader}
+      ${tableRows}
+    </div>
+
+    ${canEdit ? `<div class="add-form">
+      <div class="form-title">+ Add new entry</div>
+      <div class="form-grid form-grid-${sec.fields.length > 3 ? '3':'2'}">${addFormFields}</div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        <button class="btn btn-primary" onclick="saveEntry('${sec.id}')">Save entry</button>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+function saveEntry(sectionId) {
+  const sec = ALL_SECTIONS.find(s => s.id === sectionId);
+  const entry = { id: 'e' + Date.now(), createdBy: currentUser.name, updatedAt: 'just now' };
+  let hasValue = false;
+  sec.fields.forEach(f => {
+    const val = document.getElementById('field_'+f)?.value || '';
+    entry[f] = val;
+    if (val) hasValue = true;
+  });
+  if (!hasValue) { showToast('Please fill at least one field', 'error'); return; }
+
+  if (!sectionData[sectionId]) sectionData[sectionId] = [];
+  sectionData[sectionId].push(entry);
+
+  auditLog.unshift({ action:`Added entry to ${sec.name}`, user:currentUser.name, time:'just now', type:'add' });
+
+  renderEntryView();
+  buildDashSections();
+  buildAllSections();
+  buildAuditLog();
+  buildReportPreview();
+  showToast('Entry saved', 'success');
+}
+
+function deleteEntry(sectionId, entryId) {
+  sectionData[sectionId] = (sectionData[sectionId]||[]).filter(e => e.id !== entryId);
+  const sec = ALL_SECTIONS.find(s => s.id === sectionId);
+  auditLog.unshift({ action:`Deleted entry from ${sec.name}`, user:currentUser.name, time:'just now', type:'delete' });
+  renderEntryView();
+  buildDashSections();
+  buildAllSections();
+  buildReportPreview();
+  showToast('Entry deleted');
+}
+
+function editEntry(sectionId, entryId) {
+  const sec   = ALL_SECTIONS.find(s => s.id === sectionId);
+  const entry = (sectionData[sectionId]||[]).find(e => e.id === entryId);
+  if (!entry || !sec) return;
+  sec.fields.forEach(f => {
+    const el = document.getElementById('field_'+f);
+    if (el) el.value = entry[f] || '';
+  });
+  // Remove old, save will re-add
+  sectionData[sectionId] = sectionData[sectionId].filter(e => e.id !== entryId);
+  renderEntryView();
+  showToast('Loaded into form — edit and save');
+}
+
+function clearForm() {
+  if (!currentSection) return;
+  currentSection.fields.forEach(f => {
+    const el = document.getElementById('field_'+f);
+    if (el) el.value = '';
+  });
+}
+
+// ══════════════════════════════════════════════
+// REPORT PREVIEW
+// ══════════════════════════════════════════════
+function buildReportPreview() {
+  const entries = (k) => sectionData[k] || [];
+
+  const tableFor = (cols, rows, dept=false) => {
+    if (rows.length === 0) {
+      return `<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody><tr><td colspan="${cols.length}" style="color:#999;font-style:italic;text-align:center">No entries</td></tr></tbody></table>`;
+    }
+    return `<table><thead><tr><th>S.No</th>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>
+      ${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map((_,ci)=>`<td>${Object.values(r).filter((_,vi)=>vi<cols.length+2&&vi>1)[ci]||''}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>`;
+  };
+
+  const fa = entries('facultyJoined');
+  const sa = entries('studentAchievements');
+  const pl = entries('placements');
+  const sk = entries('skillDevelopment');
+  const ha = entries('hackathons');
+
+  document.getElementById('reportPreviewContent').innerHTML = `
+    <h1>BVRIT HYDERABAD College of Engineering for Women</h1>
+    <div class="inst-sub">(UGC Autonomous Institution | Approved by AICTE | Affiliated to JNTUH)</div>
+    <div class="inst-sub">(NAAC Accredited – A Grade | NBA Accredited B. Tech. (EEE, ECE &amp; CSE))</div>
+    <div class="inst-sub">Bachupally, Hyderabad -500 090</div>
+    <div class="report-title">Weekly Report</div>
+
+    <div class="week-line">Week Duration: <span>23rd March to 28th March</span></div>
+    <div class="week-line">Name of the Department: EEE / ECE / CSE / IT / <span>CSE (AI&amp;ML)</span> / BSH</div>
+
+    <div class="section-heading">1. General Points</div>
+    <p style="font-size:12px;color:#555">${(entries('generalPoints')[0]?.details)||'—'}</p>
+
+    <div class="section-heading">2. Faculty Joined / Relieved</div>
+    <table><thead><tr><th>S.No</th><th>Name</th><th>Department</th><th>Designation</th><th>Date of Joining</th><th>Date of Relieving</th></tr></thead>
+    <tbody>${fa.length?fa.map((e,i)=>`<tr><td>${i+1}</td><td>${e.name||''}</td><td>${e.department||''}</td><td>${e.designation||''}</td><td>${e.joiningDate||''}</td><td>${e.relievingDate||''}</td></tr>`).join(''):'<tr><td colspan="6" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>'}</tbody></table>
+
+    <div class="achievements-title">ACHIEVEMENTS</div>
+
+    <div class="section-heading">3. Faculty Achievements</div>
+    <table><thead><tr><th>S.No</th><th>Name of the Faculty Member(S)</th><th>Department</th><th>Details of the Achievement</th><th>Date</th></tr></thead>
+    <tbody>${(entries('facultyAchievements').length?entries('facultyAchievements').map((e,i)=>`<tr><td>${i+1}</td><td>${e.name||''}</td><td>${e.department||''}</td><td>${e.achievement||''}</td><td>${e.date||''}</td></tr>`).join(''):'<tr><td colspan="5" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>')}</tbody></table>
+
+    <div class="section-heading">4. Student Achievements</div>
+    <table><thead><tr><th>S.No</th><th>Name of the Student(S)</th><th>Roll. No</th><th>Department</th><th>Details of Achievement</th><th>Date</th></tr></thead>
+    <tbody>${sa.length?sa.map((e,i)=>`<tr><td>${i+1}</td><td>${e.name||''}</td><td>${e.rollNo||''}</td><td>${e.department||''}</td><td>${e.achievement||''}</td><td>${e.date||''}</td></tr>`).join(''):'<tr><td colspan="6" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>'}</tbody></table>
+
+    <div class="section-heading">5. Department Achievements</div>
+    <table><thead><tr><th>S.No</th><th>Details of Achievement</th><th>Date</th></tr></thead>
+    <tbody>${(entries('deptAchievements').length?entries('deptAchievements').map((e,i)=>`<tr><td>${i+1}</td><td>${e.achievement||''}</td><td>${e.date||''}</td></tr>`).join(''):'<tr><td colspan="3" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>')}</tbody></table>
+
+    <div class="section-heading" style="color:#c0392b;font-weight:700;text-align:center">EVENTS CONDUCTED</div>
+
+    <div class="section-heading">6. Faculty Events Conducted</div>
+    <table><thead><tr><th>S.No</th><th>Event Name</th><th>Dept</th><th>Resource Person</th><th>Coordinator</th><th>Count</th><th>Dates</th></tr></thead>
+    <tbody>${(entries('facultyEvents').length?entries('facultyEvents').map((e,i)=>`<tr><td>${i+1}</td><td>${e.eventName||''}</td><td>${e.department||''}</td><td>${e.resourcePerson||''}</td><td>${e.coordinator||''}</td><td>${e.count||''}</td><td>${e.dates||''}</td></tr>`).join(''):'<tr><td colspan="7" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>')}</tbody></table>
+
+    <div class="section-heading">10. Hackathons / External Events</div>
+    <table><thead><tr><th>S.No</th><th>Event / Hackathon</th><th>Conducted by</th><th>Mentor</th><th>Count</th><th>Dates</th></tr></thead>
+    <tbody>${ha.length?ha.map((e,i)=>`<tr><td>${i+1}</td><td>${e.eventName||''}</td><td>${e.organizer||''}</td><td>${e.mentor||''}</td><td>${e.count||''}</td><td>${e.dates||''}</td></tr>`).join(''):'<tr><td colspan="6" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>'}</tbody></table>
+
+    <div class="section-heading">15. Placements</div>
+    <table><thead><tr><th>S.No</th><th>Name of the Company</th><th>Department</th><th>No. of Students Placed</th><th>Package</th></tr></thead>
+    <tbody>${pl.length?pl.map((e,i)=>`<tr><td>${i+1}</td><td>${e.company||''}</td><td>${e.department||''}</td><td>${e.count||''}</td><td>${e.package||''}</td></tr>`).join(''):'<tr><td colspan="5" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>'}</tbody></table>
+
+    <div class="section-heading">17. Skill Development Programs</div>
+    <table><thead><tr><th>S.No</th><th>Program</th><th>Coordinator</th><th>Topic</th><th>Students</th><th>Sessions</th></tr></thead>
+    <tbody>${sk.length?sk.map((e,i)=>`<tr><td>${i+1}</td><td>${e.program||''}</td><td>${e.coordinator||''}</td><td>${e.topic||''}</td><td>${e.count||''}</td><td>${e.sessions||''}</td></tr>`).join(''):'<tr><td colspan="6" style="color:#999;font-style:italic;text-align:center">No entries</td></tr>'}</tbody></table>
+  `;
+}
+
+function exportReport(format) {
+  const prog = document.getElementById('exportProgress');
+  prog.querySelector('div').className='spinner';
+  prog.style.color='var(--green)';
+  prog.querySelector('span') ? prog.querySelector('span').textContent = `Generating ${format.toUpperCase()}…` : null;
+  prog.innerHTML = `<div class="spinner"></div>Generating ${format.toUpperCase()}…`;
+  prog.classList.add('show');
+  setTimeout(()=>{
+    prog.classList.remove('show');
+    showToast(`${format.toUpperCase()} generated! (Firebase Storage in production)`, 'success');
+  }, 2200);
+}
+
+// ══════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════
+const AVATAR_COLORS = ['#6c63ff','#f5a623','#2dd4a0','#4dabf7','#ff5c5c','#d4537e'];
+function buildUsersList() {
+  document.getElementById('usersList').innerHTML = demoUsers.map((u,i)=>`
+    <div class="user-row">
+      <div class="user-avatar" style="background:${AVATAR_COLORS[i%AVATAR_COLORS.length]}22;color:${AVATAR_COLORS[i%AVATAR_COLORS.length]}">${u.name.split(' ').slice(0,2).map(n=>n[0]).join('')}</div>
+      <div class="user-info"><div class="un">${u.name}</div><div class="ud">${u.email} · ${u.dept}</div></div>
+      <span class="role-badge rb-${u.role}">${u.role}</span>
+    </div>`).join('');
+}
+
+function buildAuditLog() {
+  const colors = { add:'var(--green)', edit:'var(--amber)', delete:'var(--red)' };
+  document.getElementById('auditLog').innerHTML = auditLog.slice(0,8).map(a=>`
+    <div class="audit-row">
+      <div class="audit-dot" style="background:${colors[a.type]||'var(--accent2)'}"></div>
+      <div class="audit-content">
+        <div class="audit-action">${a.action}</div>
+        <div class="audit-meta">${a.user} · ${a.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openAddUserModal() { document.getElementById('addUserModal').classList.add('open'); }
+function closeModal(id)     { document.getElementById(id).classList.remove('open'); }
+function addUser() {
+  const name = document.getElementById('newUserName').value;
+  const email= document.getElementById('newUserEmail').value;
+  const role = document.getElementById('newUserRole').value;
+  const dept = document.getElementById('newUserDept').value;
+  if (!name||!email) { showToast('Fill all fields','error'); return; }
+  demoUsers.push({ uid:'u'+Date.now(), name, email, role, dept });
+  buildUsersList();
+  closeModal('addUserModal');
+  showToast('User added (Firebase Auth in production)', 'success');
+}
+
+// ══════════════════════════════════════════════
+// WEEKS
+// ══════════════════════════════════════════════
+function buildWeeksList() {
+  document.getElementById('weeksList').innerHTML = demoWeeks.map(w=>`
+    <div class="week-row">
+      <div>
+        <div class="week-dates-text">${w.start} – ${w.end}</div>
+        <div class="week-range">${w.status==='open'?'Currently active':'Archived'}</div>
+      </div>
+      <button class="toggle-btn ${w.status==='open'?'on':'off'}" onclick="toggleWeek('${w.id}')">
+        <div class="toggle-knob"></div>
+      </button>
+    </div>`).join('');
+}
+
+function toggleWeek(id) {
+  const w = demoWeeks.find(w=>w.id===id);
+  if (w) { w.status = w.status==='open'?'closed':'open'; buildWeeksList(); showToast(`Week ${w.status}`, w.status==='open'?'success':''); }
+}
+
+function createWeek() {
+  const s = document.getElementById('weekStart').value;
+  const e = document.getElementById('weekEnd').value;
+  if (!s||!e) { showToast('Select both dates','error'); return; }
+  const fmt = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  demoWeeks.unshift({ id:'w'+Date.now(), start:fmt(s), end:fmt(e), status:'open' });
+  buildWeeksList();
+  showToast('Week period created', 'success');
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.classList.remove('show'); }, 3000);
+}
+
+// ══════════════════════════════════════════════
+// FIREBASE INTEGRATION STUBS
+// (Replace demo logic above with these when you
+//  add your Firebase config)
+// ══════════════════════════════════════════════
+/*
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.x.x/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from '...firebase-auth.js';
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp } from '...firebase-firestore.js';
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// Real-time listener for a section
+function listenToSection(weekId, dept, sectionType) {
+  const q = query(
+    collection(db, `weeks/${weekId}/reports/${dept}/entries`),
+    where('sectionType','==', sectionType),
+    orderBy('createdAt')
+  );
+  return onSnapshot(q, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === 'added')    addRowToUI(change.doc.id, change.doc.data());
+      if (change.type === 'modified') updateRowInUI(change.doc.id, change.doc.data());
+      if (change.type === 'removed')  removeRowFromUI(change.doc.id);
+    });
+  });
+}
+
+// Save entry to Firestore
+async function saveEntryToFirestore(weekId, dept, sectionType, payload) {
+  await addDoc(collection(db, `weeks/${weekId}/reports/${dept}/entries`), {
+    sectionType,
+    payload,
+    createdBy: auth.currentUser.uid,
+    createdAt:  serverTimestamp(),
+    updatedAt:  serverTimestamp()
+  });
+}
+
+// Set user role via custom claim (callable Cloud Function)
+async function setUserRole(uid, role, dept) {
+  const setRole = httpsCallable(functions, 'setUserRole');
+  await setRole({ uid, role, department: dept });
+}
+*/
+</script>
+</body>
+</html>
