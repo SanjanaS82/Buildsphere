@@ -321,7 +321,7 @@ textarea{resize:vertical;min-height:80px}
 
     <nav class="nav">
       <div class="nav-section">Overview</div>
-      <button class="nav-item active" onclick="showPage('dashboard')">
+      <button class="nav-item active" onclick="showPage('dash')">
         <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
         Dashboard
       </button>
@@ -655,6 +655,7 @@ function quickLogin(role) {
 
 function loginAs(user) {
   currentUser = user;
+  localStorage.setItem("user", JSON.stringify(user));
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
   document.getElementById('sidebarName').textContent = user.name;
@@ -673,6 +674,10 @@ function loginAs(user) {
 
 function doLogout() {
   currentUser = null;
+
+  // 👉 remove stored user
+  localStorage.removeItem("user");
+
   document.getElementById('appScreen').classList.remove('active');
   document.getElementById('loginScreen').classList.add('active');
   showToast('Signed out');
@@ -1128,6 +1133,14 @@ async function setUserRole(uid, role, dept) {
   await setRole({ uid, role, department: dept });
 }
 */
+// Restore session on refresh
+window.onload = () => {
+  const savedUser = localStorage.getItem("user");
+
+  if (savedUser) {
+    loginAs(JSON.parse(savedUser));
+  }
+};
 </script>
 </body>
 </html>
