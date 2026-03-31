@@ -6,6 +6,7 @@
 <title>BVRIT Weekly Report System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 :root {
@@ -527,6 +528,10 @@ textarea{resize:vertical;min-height:80px}
 <div id="toast"></div>
 
 <script>
+const SUPABASE_URL = "https://odjqycptwypwcyvxzucv.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kanF5Y3B0d3lwd2N5dnh6dWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzA5NjMsImV4cCI6MjA5MDUwNjk2M30.qQCfk_bVJsFl1WzSKpE42JCcqDWOGKSyLMUX3KiOYPk";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ══════════════════════════════════════════════
 // FIREBASE CONFIG — Replace with your project config
 // ══════════════════════════════════════════════
@@ -754,8 +759,9 @@ function buildAllSections() {
 function openSection(sectionId) {
   currentSection = ALL_SECTIONS.find(s => s.id === sectionId);
   if (!currentSection) return;
+
   showPage('entry');
-  renderEntryView();
+  loadEntries(sectionId); // 🔥 THIS LINE IS IMPORTANT
 }
 
 function renderEntryView() {
@@ -816,28 +822,63 @@ function renderEntryView() {
   `;
 }
 
-function saveEntry(sectionId) {
+async function saveEntry(sectionId) {
   const sec = ALL_SECTIONS.find(s => s.id === sectionId);
-  const entry = { id: 'e' + Date.now(), createdBy: currentUser.name, updatedAt: 'just now' };
+
+  let entryData = {};
   let hasValue = false;
+
   sec.fields.forEach(f => {
-    const val = document.getElementById('field_'+f)?.value || '';
-    entry[f] = val;
+    const val = document.getElementById('field_' + f)?.value || '';
+    entryData[f] = val;
     if (val) hasValue = true;
   });
-  if (!hasValue) { showToast('Please fill at least one field', 'error'); return; }
 
-  if (!sectionData[sectionId]) sectionData[sectionId] = [];
-  sectionData[sectionId].push(entry);
+  if (!hasValue) {
+    showToast("Fill at least one field", "error");
+    return;
+  }
 
-  auditLog.unshift({ action:`Added entry to ${sec.name}`, user:currentUser.name, time:'just now', type:'add' });
+  const { error } = await supabaseClient
+    .from('entries')
+    .insert([
+      {
+        section: sectionId,
+        week_id: "week13",
+        data: entryData,
+        created_by: currentUser.name
+      }
+    ]);
+
+  if (error) {
+    console.log(error);
+    showToast("Error saving", "error");
+  } else {
+    showToast("Saved to DB 🚀", "success");
+    loadEntries(sectionId); // reload UI
+  }
+}
+
+async function loadEntries(sectionId) {
+  const { data, error } = await supabaseClient
+    .from('entries')
+    .select('*')
+    .eq('section', sectionId)
+    .eq('week_id', "week13");
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  // Convert DB format → UI format
+  sectionData[sectionId] = data.map(e => ({
+    ...e.data,
+    id: e.id,
+    createdBy: e.created_by
+  }));
 
   renderEntryView();
-  buildDashSections();
-  buildAllSections();
-  buildAuditLog();
-  buildReportPreview();
-  showToast('Entry saved', 'success');
 }
 
 function deleteEntry(sectionId, entryId) {
