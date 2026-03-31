@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   body {
-  visibility: hidden;
+  visibility: visible;
 }
 :root {
   --bg: #0e0f13;
@@ -57,11 +57,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ─────────────── LOGIN ─────────────── */
 #loginScreen{
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  justify-content:center;background:var(--bg)}
+  background:var(--bg);
+}
+#loginScreen.hidden{
+  display: none !important;
+}
 .login-card{width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:44px;box-shadow:var(--shadow)}
 .login-logo{text-align:center;margin-bottom:32px}
 .login-logo .wordmark{font-size:13px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
@@ -741,8 +745,8 @@ async function doLogin() {
   };
 
   // Continue login flow
-  document.getElementById('loginScreen').classList.remove('active');
-  document.getElementById('appScreen').classList.add('active');
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').style.display = 'flex';
 
   document.getElementById('sidebarName').textContent = data.name;
   document.getElementById('sidebarRole').textContent = `${data.role} · ${data.dept}`;
@@ -761,8 +765,8 @@ await loadEntries('facultyJoined');
 function loginAs(user) {
   currentUser = user;
   localStorage.setItem("user", JSON.stringify(user));
-  document.getElementById('loginScreen').classList.remove('active');
-  document.getElementById('appScreen').classList.add('active');
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').style.display = 'flex';
   document.getElementById('sidebarName').textContent = user.name;
   document.getElementById('sidebarRole').textContent = `${user.role.charAt(0).toUpperCase()+user.role.slice(1)} · ${user.dept}`;
   document.getElementById('sidebarRole').className = `user-role role-${user.role}`;
@@ -786,7 +790,7 @@ function doLogout() {
   localStorage.setItem("loggedOut", "true");
 
   document.getElementById('appScreen').style.display = 'none';
-document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginScreen').classList.remove('hidden');
 }
 // ══════════════════════════════════════════════
 // NAVIGATION
@@ -1285,11 +1289,10 @@ window.onload = () => {
     return;
   }
 
+  // No saved session — show login screen
   localStorage.removeItem("loggedOut");
-
-  document.getElementById('loginScreen').style.display = 'none';
-document.getElementById('appScreen').style.display = 'flex';
-document.body.style.visibility = 'visible';
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appScreen').style.display = 'none';
 };
 </script>
 <div class="modal-overlay" id="signupModal">
