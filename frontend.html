@@ -52,7 +52,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ─────────────── LOGIN ─────────────── */
 #loginScreen{
-  display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
@@ -296,7 +295,7 @@ textarea{resize:vertical;min-height:80px}
 <button class="btn btn-ghost btn-full" onclick="showSignup()">Create account</button>
   
 </div>
-
+</div>
 <!-- ══════════════ APP ══════════════ -->
 <div id="appScreen" class="screen">
 
@@ -709,9 +708,8 @@ async function doLogin() {
     dept: data.dept
   };
 
-  // Continue login flow
   document.getElementById('loginScreen').classList.remove('active');
-  document.getElementById('appScreen').classList.add('active');
+document.getElementById('appScreen').classList.add('active');
 
   document.getElementById('sidebarName').textContent = data.name;
   document.getElementById('sidebarRole').textContent = `${data.role} · ${data.dept}`;
@@ -745,7 +743,6 @@ function doLogout() {
   currentUser = null;
 
   localStorage.removeItem("user");
-  localStorage.setItem("loggedOut", "true");
 
   document.getElementById('appScreen').classList.remove('active');
   document.getElementById('loginScreen').classList.add('active');
