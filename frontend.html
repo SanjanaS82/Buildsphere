@@ -51,7 +51,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .screen.active{display:flex}
 
 /* ─────────────── LOGIN ─────────────── */
-#loginScreen{align-items:center;justify-content:center;background:var(--bg)}
+#loginScreen{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  justify-content:center;background:var(--bg)}
 .login-card{width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:44px;box-shadow:var(--shadow)}
 .login-logo{text-align:center;margin-bottom:32px}
 .login-logo .wordmark{font-size:13px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
@@ -285,17 +290,11 @@ textarea{resize:vertical;min-height:80px}
       <input type="password" id="loginPassword" placeholder="••••••••" value="password123"/>
     </div>
     <button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
-<button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
-
-<button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
 
 <div class="divider">or</div>
 
 <button class="btn btn-ghost btn-full" onclick="showSignup()">Create account</button>
-    
-    </div>
-    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:16px">Demo mode — Firebase config needed for production</p>
-  </div>
+  
 </div>
 
 <!-- ══════════════ APP ══════════════ -->
