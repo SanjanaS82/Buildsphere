@@ -1139,6 +1139,10 @@ window.onload = () => {
 
   if (savedUser) {
     loginAs(JSON.parse(savedUser));
+  } else {
+    // explicitly show login screen
+    document.getElementById('loginScreen').classList.add('active');
+    document.getElementById('appScreen').classList.remove('active');
   }
 };
 </script>
