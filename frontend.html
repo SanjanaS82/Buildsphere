@@ -285,21 +285,14 @@ textarea{resize:vertical;min-height:80px}
       <input type="password" id="loginPassword" placeholder="••••••••" value="password123"/>
     </div>
     <button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
+<button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
 
-    <div class="divider" style="margin-top:24px">Quick demo login</div>
-    <div class="demo-roles">
-      <div class="role-chip" onclick="quickLogin('faculty')">
-        <div class="role-name">Faculty</div>
-        <div class="role-dept">CSE(AI&ML)</div>
-      </div>
-      <div class="role-chip" onclick="quickLogin('coordinator')">
-        <div class="role-name">Coordinator</div>
-        <div class="role-dept">All depts</div>
-      </div>
-      <div class="role-chip" onclick="quickLogin('admin')">
-        <div class="role-name">Admin</div>
-        <div class="role-dept">Full access</div>
-      </div>
+<button class="btn btn-primary btn-full" onclick="doLogin()">Sign in</button>
+
+<div class="divider">or</div>
+
+<button class="btn btn-ghost btn-full" onclick="showSignup()">Create account</button>
+    
     </div>
     <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:16px">Demo mode — Firebase config needed for production</p>
   </div>
@@ -528,6 +521,33 @@ textarea{resize:vertical;min-height:80px}
 <div id="toast"></div>
 
 <script>
+  function showSignup() {
+  document.getElementById('signupModal').classList.add('open');
+}
+async function signup() {
+  const name = document.getElementById('signupName').value;
+  const email = document.getElementById('signupEmail').value;
+  const password = document.getElementById('signupPassword').value;
+  const role = document.getElementById('signupRole').value;
+  const dept = document.getElementById('signupDept').value;
+
+  if (!name || !email || !password) {
+    showToast("Fill all required fields", "error");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('users')
+    .insert([{ name, email, password, role, dept }]);
+
+  if (error) {
+    console.log(error);
+    showToast("Signup failed", "error");
+  } else {
+    showToast("Account created 🎉", "success");
+    closeModal('signupModal');
+  }
+}
 const SUPABASE_URL = "https://odjqycptwypwcyvxzucv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kanF5Y3B0d3lwd2N5dnh6dWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzA5NjMsImV4cCI6MjA5MDUwNjk2M30.qQCfk_bVJsFl1WzSKpE42JCcqDWOGKSyLMUX3KiOYPk";
 
@@ -547,11 +567,6 @@ const FIREBASE_CONFIG = {
 // ══════════════════════════════════════════════
 // DEMO DATA (used when Firebase not configured)
 // ══════════════════════════════════════════════
-const DEMO_USERS = {
-  faculty:      { uid:'u1', name:'Dr. Ananya Reddy',    email:'faculty@bvrit.ac.in',     role:'faculty',      dept:'CSE(AI&ML)' },
-  coordinator:  { uid:'u2', name:'Prof. Sridhar Rao',   email:'coord@bvrit.ac.in',       role:'coordinator',  dept:'CSE(AI&ML)' },
-  admin:        { uid:'u3', name:'Dr. Meena Krishnan',  email:'admin@bvrit.ac.in',       role:'admin',        dept:'All' }
-};
 
 const ALL_SECTIONS = [
   { id:'generalPoints',         num:'01', name:'General Points',                  fields:['details'], cols:['Details'], gridCols:'1fr' },
@@ -641,18 +656,46 @@ let demoWeeks = [
 // ══════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('loginEmail').value;
-  const pass  = document.getElementById('loginPassword').value;
-  if (!email || !pass) { showToast('Enter email and password','error'); return; }
-  // Demo: match by email
-  const found = Object.values(DEMO_USERS).find(u => u.email === email);
-  if (found) { loginAs(found); }
-  else { quickLogin('faculty'); }
-}
+  const password = document.getElementById('loginPassword').value;
 
-function quickLogin(role) {
-  loginAs(DEMO_USERS[role]);
+  if (!email || !password) {
+    showToast("Enter email and password", "error");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('users')
+    .select('*')
+    .eq('email', email)
+    .eq('password', password)
+    .single();
+
+  if (error || !data) {
+    showToast("Invalid credentials", "error");
+    return;
+  }
+
+  // ✅ Set current user
+  currentUser = {
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    dept: data.dept
+  };
+
+  // Continue login flow
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+
+  document.getElementById('sidebarName').textContent = data.name;
+  document.getElementById('sidebarRole').textContent = `${data.role} · ${data.dept}`;
+
+  buildDashSections();
+  buildAllSections();
+
+  showToast("Welcome 🚀", "success");
 }
 
 function loginAs(user) {
@@ -1182,5 +1225,43 @@ window.onload = () => {
   }
 };
 </script>
+<div class="modal-overlay" id="signupModal">
+  <div class="modal">
+    <div class="modal-title">Create Account</div>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input id="signupName"/>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input id="signupEmail"/>
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="signupPassword"/>
+    </div>
+
+    <div class="form-group">
+      <label>Role</label>
+      <select id="signupRole">
+        <option value="faculty">Faculty</option>
+        <option value="coordinator">Coordinator</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Department</label>
+      <input id="signupDept"/>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('signupModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="signup()">Create</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
