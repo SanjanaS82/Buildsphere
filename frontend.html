@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --bg: #0e0f13;
@@ -615,7 +615,9 @@ const DEMO_ENTRIES = {
 // APP STATE
 // ══════════════════════════════════════════════
 let currentUser = null;
+let currentWeek = "week13";
 let currentSection = null;
+let editingEntryId = null;
 let sectionData = JSON.parse(JSON.stringify(DEMO_ENTRIES));
 let demoUsers = [
   { uid:'u1', name:'Dr. Ananya Reddy',    email:'faculty@bvrit.ac.in',   role:'faculty',     dept:'CSE(AI&ML)', color:'#6c63ff' },
@@ -839,6 +841,12 @@ async function saveEntry(sectionId) {
     if (val) hasValue = true;
   });
 
+  // ✅ VALIDATION (add this)
+if (!entryData[sec.fields[0]]) {
+  showToast("Please fill the first required field", "error");
+  return;
+}
+
   if (!hasValue) {
     showToast("Fill at least one field", "error");
     return;
@@ -849,7 +857,7 @@ async function saveEntry(sectionId) {
     .insert([
       {
         section: sectionId,
-        week_id: "week13",
+        week_id: currentWeek,
         data: entryData,
         created_by: currentUser.name
       }
@@ -864,12 +872,14 @@ async function saveEntry(sectionId) {
   }
 }
 
+
+
 async function loadEntries(sectionId) {
   const { data, error } = await supabaseClient
     .from('entries')
     .select('*')
     .eq('section', sectionId)
-    .eq('week_id', "week13");
+    .eq('week_id', currentWeek);
 
   if (error) {
     console.log(error);
@@ -884,17 +894,22 @@ async function loadEntries(sectionId) {
   }));
 
   renderEntryView();
+buildDashSections();   // ✅ ADD
+buildAllSections();    // ✅ ADD
 }
 
-function deleteEntry(sectionId, entryId) {
-  sectionData[sectionId] = (sectionData[sectionId]||[]).filter(e => e.id !== entryId);
-  const sec = ALL_SECTIONS.find(s => s.id === sectionId);
-  auditLog.unshift({ action:`Deleted entry from ${sec.name}`, user:currentUser.name, time:'just now', type:'delete' });
-  renderEntryView();
-  buildDashSections();
-  buildAllSections();
-  buildReportPreview();
-  showToast('Entry deleted');
+async function deleteEntry(sectionId, entryId) {
+  const { error } = await supabaseClient
+    .from('entries')
+    .delete()
+    .eq('id', entryId);
+
+  if (error) {
+    showToast("Delete failed", "error");
+  } else {
+    showToast("Deleted", "success");
+    loadEntries(sectionId);
+  }
 }
 
 function editEntry(sectionId, entryId) {
