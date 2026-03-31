@@ -677,14 +677,12 @@ function loginAs(user) {
 function doLogout() {
   currentUser = null;
 
-  // 👉 remove stored user
   localStorage.removeItem("user");
+  localStorage.setItem("loggedOut", "true");
 
   document.getElementById('appScreen').classList.remove('active');
   document.getElementById('loginScreen').classList.add('active');
-  showToast('Signed out');
 }
-
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
@@ -1172,14 +1170,17 @@ async function setUserRole(uid, role, dept) {
 // Restore session on refresh
 window.onload = () => {
   const savedUser = localStorage.getItem("user");
+  const loggedOut = localStorage.getItem("loggedOut");
 
-  if (savedUser) {
+  if (savedUser && !loggedOut) {
     loginAs(JSON.parse(savedUser));
-  } else {
-    // explicitly show login screen
-    document.getElementById('loginScreen').classList.add('active');
-    document.getElementById('appScreen').classList.remove('active');
+    return;
   }
+
+  localStorage.removeItem("loggedOut");
+
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('appScreen').classList.remove('active');
 };
 </script>
 </body>
