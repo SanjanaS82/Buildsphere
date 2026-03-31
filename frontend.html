@@ -742,6 +742,11 @@ async function doLogin() {
 
   buildDashSections();
   buildAllSections();
+  await loadEntries('studentAchievements');
+await loadEntries('placements');
+await loadEntries('hackathons');
+await loadEntries('skillDevelopment');
+await loadEntries('facultyJoined');
 
   showToast("Welcome 🚀", "success");
 }
@@ -781,6 +786,9 @@ function doLogout() {
 // ══════════════════════════════════════════════
 const PAGES = ['dash','sections','entry','preview','admin','weeks'];
 function showPage(name) {
+  if (name === 'preview') {
+  buildReportPreview();
+}
   PAGES.forEach(p => {
     const el = document.getElementById(p+'Page');
     if(el) el.style.display = 'none';
