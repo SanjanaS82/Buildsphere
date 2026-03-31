@@ -403,13 +403,23 @@ textarea{resize:vertical;min-height:80px}
     </div>
 
     <!-- ── SECTIONS LIST PAGE ── -->
-    <div id="sectionsPage" class="page-content" style="display:none">
-      <div class="page-header">
-        <div class="page-title">All Sections</div>
-        <div class="page-sub">Click a section to add or manage entries</div>
-      </div>
-      <div class="sections-grid" id="allSectionsGrid" style="grid-template-columns:repeat(3,1fr)"></div>
-    </div>
+ <div id="sectionsPage" class="page-content" style="display:none">
+  <div class="page-header">
+    <div class="page-title">All Sections</div>
+    <div class="page-sub">Click a section to add or manage entries</div>
+
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Search sections..." 
+      style="margin-top:10px;padding:8px;width:250px;border-radius:6px;border:1px solid #ccc"
+      oninput="filterSections()"
+    />
+  </div>
+
+  <!-- THIS IS REQUIRED -->
+  <div class="sections-grid" id="allSectionsGrid"></div>
+</div>
 
     <!-- ── ENTRY PAGE ── -->
     <div id="entryPage" class="page-content" style="display:none">
@@ -625,7 +635,22 @@ const DEMO_ENTRIES = {
     { id:'e12', name:'Dr.M.Pallavi', department:'CSE(AI&ML)', designation:'Assistant Professor', joiningDate:'23-03-2026', relievingDate:'-', createdBy:'Admin', updatedAt:'6 hrs ago' },
   ],
 };
+function filterSections() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
 
+  const filtered = ALL_SECTIONS.filter(sec =>
+    sec.name.toLowerCase().includes(query)
+  );
+
+  if (filtered.length === 0) {
+    document.getElementById('allSectionsGrid').innerHTML =
+      `<div style="color:gray">No matching sections</div>`;
+    return;
+  }
+
+  document.getElementById('allSectionsGrid').innerHTML =
+    filtered.map(s => buildSectionCard(s, `openSection('${s.id}')`)).join('');
+}
 // ══════════════════════════════════════════════
 // APP STATE
 // ══════════════════════════════════════════════
