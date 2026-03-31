@@ -52,6 +52,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ─────────────── LOGIN ─────────────── */
 #loginScreen{
+  display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
@@ -295,7 +296,7 @@ textarea{resize:vertical;min-height:80px}
 <button class="btn btn-ghost btn-full" onclick="showSignup()">Create account</button>
   
 </div>
-</div>
+
 <!-- ══════════════ APP ══════════════ -->
 <div id="appScreen" class="screen">
 
@@ -355,6 +356,15 @@ textarea{resize:vertical;min-height:80px}
     <div class="topbar">
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <div class="topbar-actions">
+
+  <!-- 🔽 WEEK SELECTOR -->
+  <select id="weekSelector" onchange="changeWeek(this.value)" 
+    style="font-size:12px;padding:5px;border-radius:6px;">
+    
+    <option value="week13">23–28 Mar 2026</option>
+    <option value="week12">16–22 Mar 2026</option>
+    <option value="week11">9–15 Mar 2026</option>
+  </select>
         <div style="font-size:12px;color:var(--text3)">23–28 Mar 2026</div>
         <div style="display:flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid rgba(45,212,160,.2);border-radius:20px;padding:5px 10px">
           <span class="dot"></span>
@@ -649,6 +659,21 @@ function filterSections() {
   document.getElementById('allSectionsGrid').innerHTML =
     filtered.map(s => buildSectionCard(s, `openSection('${s.id}')`)).join('');
 }
+  const WEEK_MAP = {
+  week13: "23–28 Mar 2026",
+  week12: "16–22 Mar 2026",
+  week11: "9–15 Mar 2026"
+};
+  function changeWeek(weekId) {
+  currentWeek = weekId;
+  document.getElementById("weekDisplay").textContent = WEEK_MAP[currentWeek];
+  showToast(`Switched to ${weekId}`, "success");
+
+  loadEntries();
+  buildDashSections();
+  buildAllSections();
+  buildReportPreview();
+}
 // ══════════════════════════════════════════════
 // APP STATE
 // ══════════════════════════════════════════════
@@ -708,8 +733,9 @@ async function doLogin() {
     dept: data.dept
   };
 
+  // Continue login flow
   document.getElementById('loginScreen').classList.remove('active');
-document.getElementById('appScreen').classList.add('active');
+  document.getElementById('appScreen').classList.add('active');
 
   document.getElementById('sidebarName').textContent = data.name;
   document.getElementById('sidebarRole').textContent = `${data.role} · ${data.dept}`;
@@ -730,6 +756,8 @@ function loginAs(user) {
   document.getElementById('sidebarRole').className = `user-role role-${user.role}`;
   document.getElementById('greetName').textContent = user.name.split(' ')[1] || user.name;
   document.getElementById('adminNav').style.display = user.role === 'admin' ? 'block' : 'none';
+  document.getElementById("weekSelector").value = currentWeek;
+  document.getElementById("weekDisplay").textContent = WEEK_MAP[currentWeek];
   buildDashSections();
   buildAllSections();
   buildUsersList();
@@ -743,6 +771,7 @@ function doLogout() {
   currentUser = null;
 
   localStorage.removeItem("user");
+  localStorage.setItem("loggedOut", "true");
 
   document.getElementById('appScreen').classList.remove('active');
   document.getElementById('loginScreen').classList.add('active');
