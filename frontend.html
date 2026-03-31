@@ -734,10 +734,6 @@ function buildSectionCard(sec, onclick) {
       <div class="section-name">${sec.name}</div>
       <div class="section-count">${count} ${count===1?'entry':'entries'}</div>
     </div>
-    <div class="section-status">
-      <span class="status-pill ${cls[status]}">${labels[status]}</span>
-      <div class="status-dot ${status==='pending'?'status-pending':status==='progress'?'status-progress':'status-complete'}"></div>
-    </div>
   </div>`;
 }
 
@@ -809,7 +805,7 @@ function renderEntryView() {
       </div>
       <div style="display:flex;gap:10px;align-items:center">
         <span class="chip chip-blue">CSE(AI&ML)</span>
-        <span class="chip ${getSectionStatus(sec.id)==='complete'?'chip-green':getSectionStatus(sec.id)==='progress'?'chip-amber':'chip-blue'}">${getSectionStatus(sec.id).charAt(0).toUpperCase()+getSectionStatus(sec.id).slice(1)}</span>
+        <span class="chip chip-blue">Active</span>${getSectionStatus(sec.id).charAt(0).toUpperCase()+getSectionStatus(sec.id).slice(1)}</span>
       </div>
     </div>
 
